@@ -114,14 +114,16 @@ uv run up-agents config validate
 
 ## 🤖 Supported Providers
 
-| Provider | Models | Status |
-|----------|--------|---------|
-| **OpenAI** | GPT-4, GPT-3.5-turbo, GPT-4-nano | ✅ Production ready |
-| **Google Gemini** | gemini-2.5-flash, gemini-pro | ✅ Production ready |
-| **Mistral AI** | mistral-large-latest, mistral-medium | ✅ Production ready |
-| **Ollama** | llama2, qwen3, codellama, etc. | ✅ Production ready |
-| **OpenRouter** | 100+ models via unified API | ✅ Production ready |
-| **Custom OpenAI** | Any OpenAI-compatible endpoint | ✅ Production ready |
+| Provider | Models | Status | Notes |
+|----------|--------|---------|-------|
+| **OpenAI** | All available provider models | ✅ Chat-only | Full tool-calling support |
+| **Google Gemini** | All available provider models | ✅ Chat-only | Full tool-calling support |
+| **Mistral AI** | All available provider models | ✅ Chat-only | Full tool-calling support |
+| **Ollama** | All locally installed models | ✅ Chat-only | Tool-calling depends on model |
+| **OpenRouter** | 100+ models via unified API | ✅ Chat-only | Tool-calling depends on model |
+| **Custom OpenAI** | Any OpenAI-compatible endpoint | ✅ Chat-only | Tool-calling depends on model |
+
+> **MCP Note:** With planned MCP protocol integration, there may be limitations with models that don't support tool-calling. Modern models (GPT-4, Gemini 2.5, Mistral Large) have full support.
 
 ### ✨ Features
 
