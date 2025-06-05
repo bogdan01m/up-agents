@@ -1,7 +1,6 @@
 import asyncio
 import os
 
-import src.llms.llm_call.llm_providers  # noqa: F401
 from src.llms.llm_call.base_provider import ProviderConfig, ProviderType
 from src.llms.llm_call.env_config import load_dotenv_if_exists
 from src.llms.llm_call.provider_factory import ProviderFactory
