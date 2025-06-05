@@ -5,8 +5,12 @@ description = "Терминальная агентная система с по�
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "click>=8.1.8",
+    "prompt-toolkit>=3.0.51",
     "pydantic>=2.11.4",
     "pydantic-ai>=0.1.9",
+    "python-dotenv>=1.1.0",
+    "rich>=14.0.0",
 ]
 
 [build-system]
@@ -17,7 +21,8 @@ build-backend = "hatchling.build"
 packages = ["src"]
 
 [project.scripts]
-up-agents = "src.llms.main:main"
+up-agents = "src.cli.main:main"
+up-agents-demo = "src.llms.main:main"
 
 [tool.uv]
 dev-dependencies = [
