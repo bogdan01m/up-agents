@@ -433,6 +433,43 @@ wheels = [
 ]
 
 [[package]]
+name = "mcode"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "click" },
+    { name = "prompt-toolkit" },
+    { name = "pydantic" },
+    { name = "pydantic-ai" },
+    { name = "python-dotenv" },
+    { name = "rich" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "black" },
+    { name = "pytest" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "click", specifier = ">=8.1.8" },
+    { name = "prompt-toolkit", specifier = ">=3.0.51" },
+    { name = "pydantic", specifier = ">=2.11.4" },
+    { name = "pydantic-ai", specifier = ">=0.1.9" },
+    { name = "python-dotenv", specifier = ">=1.1.0" },
+    { name = "rich", specifier = ">=14.0.0" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "black", specifier = ">=24.10.0" },
+    { name = "pytest", specifier = ">=8.3.4" },
+    { name = "ruff", specifier = ">=0.8.4" },
+]
+
+[[package]]
 name = "mcp"
 version = "1.7.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1001,43 +1038,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/82/5c/e6082df02e215b846b4b8c0b887a64d7d08ffaba30605502639d44c06b82/typing_inspection-0.4.0.tar.gz", hash = "sha256:9765c87de36671694a67904bf2c96e395be9c6439bb6c87b5142569dcdd65122", size = 76222 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/31/08/aa4fdfb71f7de5176385bd9e90852eaf6b5d622735020ad600f2bab54385/typing_inspection-0.4.0-py3-none-any.whl", hash = "sha256:50e72559fcd2a6367a19f7a7e610e6afcb9fac940c650290eed893d61386832f", size = 14125 },
-]
-
-[[package]]
-name = "up-agents"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "click" },
-    { name = "prompt-toolkit" },
-    { name = "pydantic" },
-    { name = "pydantic-ai" },
-    { name = "python-dotenv" },
-    { name = "rich" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "black" },
-    { name = "pytest" },
-    { name = "ruff" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "click", specifier = ">=8.1.8" },
-    { name = "prompt-toolkit", specifier = ">=3.0.51" },
-    { name = "pydantic", specifier = ">=2.11.4" },
-    { name = "pydantic-ai", specifier = ">=0.1.9" },
-    { name = "python-dotenv", specifier = ">=1.1.0" },
-    { name = "rich", specifier = ">=14.0.0" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "black", specifier = ">=24.10.0" },
-    { name = "pytest", specifier = ">=8.3.4" },
-    { name = "ruff", specifier = ">=0.8.4" },
 ]
 
 [[package]]

@@ -1,5 +1,5 @@
 [project]
-name = "up-agents"
+name = "mcode"
 version = "0.1.0"
 description = "Терминальная агентная система с поддержкой различных LLM провайдеров и MCP протокола"
 readme = "README.md"
@@ -21,8 +21,8 @@ build-backend = "hatchling.build"
 packages = ["src"]
 
 [project.scripts]
-up-agents = "src.cli.main:main"
-up-agents-demo = "src.llms.main:main"
+mcode = "src.cli.main:main"
+mcode-demo = "src.llms.main:main"
 
 [tool.uv]
 dev-dependencies = [

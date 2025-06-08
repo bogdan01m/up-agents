@@ -1,10 +1,10 @@
-
 # Import providers for registration
 import src.llms.llm_call.llm_providers  # noqa: F401
 from rich.console import Console
 from rich.live import Live
 from rich.markdown import Markdown
 from rich.panel import Panel
+from src.cli.session import SessionManager
 from src.llms.llm_call.base_provider import ProviderType
 from src.llms.llm_call.provider_factory import ProviderFactory
 
@@ -12,9 +12,32 @@ console = Console()
 
 
 class ChatEngine:
-    def __init__(self):
+    def __init__(self, session_name: str = None, save_session: bool = True):
         self.provider = None
-        self.history: list[dict[str, str]] = []
+        self.session_manager = SessionManager()
+        self.session_name = session_name
+        self.save_session = save_session
+        self._setup_session()
+
+    def _setup_session(self):
+        """Setup session based on session_name"""
+        if self.session_name:
+            # Try to load existing session
+            existing = self.session_manager.load_session(self.session_name)
+            if existing:
+                console.print(
+                    f"[dim]Loaded session: {self.session_name} ({len(existing.messages)} messages)[/dim]"
+                )
+            else:
+                # Create new named session
+                self.session_manager.create_session(self.session_name)
+                console.print(f"[dim]Created new session: {self.session_name}[/dim]")
+        else:
+            # Create temporary session
+            is_temp = not self.save_session
+            self.session_manager.create_session(temp=is_temp)
+            if is_temp:
+                console.print("[dim]Using temporary session (not saved)[/dim]")
 
     def setup_provider(
         self,
@@ -114,7 +137,7 @@ class ChatEngine:
             console.print(f"[red]Error: {e}[/red]")
             return ""
 
-    async def interactive_chat(self, save_history: bool = True):
+    async def interactive_chat(self):
         """Start interactive chat session"""
         if not self.provider:
             console.print("[red]Provider not setup[/red]")
@@ -124,7 +147,7 @@ class ChatEngine:
             Panel(
                 "[bold green]Interactive Chat Mode[/bold green]\n"
                 "Type your messages and press Enter. Use 'exit', 'quit', or Ctrl+C to stop.",
-                title="🤖 up-agents",
+                title="🤖 mcode",
                 border_style="green",
             )
         )
@@ -138,13 +161,14 @@ class ChatEngine:
                         break
 
                     if message.strip():
+                        # Add user message to session
+                        self.session_manager.add_message("user", message)
+
                         response = await self.single_query(message)
 
-                        if save_history:
-                            self.history.append({"role": "user", "content": message})
-                            self.history.append(
-                                {"role": "assistant", "content": response}
-                            )
+                        # Add assistant response to session
+                        if response:
+                            self.session_manager.add_message("assistant", response)
 
                         console.print()  # Empty line for spacing
 
@@ -154,21 +178,53 @@ class ChatEngine:
         except KeyboardInterrupt:
             console.print("\n[yellow]Chat ended[/yellow]")
 
-        if save_history and self.history:
-            try:
-                save_choice = input("Save this chat session? (Y/n): ").lower()
-                if save_choice in ["", "y", "yes"]:
-                    console.print("[dim]Session saving not implemented yet[/dim]")
-            except (EOFError, KeyboardInterrupt):
-                pass
+        # Save session if needed
+        if self.save_session and self.session_manager.get_current_session():
+            current_session = self.session_manager.get_current_session()
+            if current_session.messages:
+                try:
+                    if self.session_name:
+                        # Named session - save automatically
+                        self.session_manager.save_current_session()
+                        console.print(f"[dim]Session saved: {self.session_name}[/dim]")
+                    else:
+                        # Temporary session - ask for name
+                        save_choice = input("Save this chat session? (Y/n): ").lower()
+                        if save_choice in ["", "y", "yes"]:
+                            session_name = input("Enter session name: ").strip()
+                            if session_name:
+                                current_session.session_name = session_name
+                                self.session_manager.save_current_session()
+                                console.print(
+                                    f"[dim]Session saved as: {session_name}[/dim]"
+                                )
+                            else:
+                                console.print("[dim]Session not saved[/dim]")
+                except (EOFError, KeyboardInterrupt):
+                    pass
 
     async def _get_llm_response(self, message: str) -> str:
         """Get real LLM response using the provider"""
         try:
-            # Use the provider's get_response method
-            response = await self.provider.get_response(message)
+            # Get conversation history for context
+            messages = self.session_manager.get_messages_for_llm()
+
+            # Add current message
+            current_messages = messages + [{"role": "user", "content": message}]
+
+            # Use the provider's get_response method with full context
+            if hasattr(self.provider, "get_response_with_history"):
+                response = await self.provider.get_response_with_history(
+                    current_messages
+                )
+            else:
+                # Fallback to single message if provider doesn't support history
+                response = await self.provider.get_response(message)
+
             return response
         except Exception as e:
             # Fallback to simulation if LLM call fails
-            console.print(f"[yellow]Warning: LLM call failed ({e}), using simulation[/yellow]")
+            console.print(
+                f"[yellow]Warning: LLM call failed ({e}), using simulation[/yellow]"
+            )
             return f"I'm a simulated response because the real LLM call failed. You said: '{message}'"

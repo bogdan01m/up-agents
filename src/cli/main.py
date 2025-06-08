@@ -14,7 +14,7 @@ load_dotenv_if_exists()
 
 
 @click.group()
-@click.version_option(version="0.1.0", prog_name="up-agents")
+@click.version_option(version="0.1.0", prog_name="mcode")
 @click.option("--verbose", "-v", is_flag=True, help="Enable verbose output")
 def cli(verbose):
     """Terminal agent system with support for various LLM providers"""

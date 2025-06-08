@@ -72,7 +72,9 @@ class ProviderEnvLoader:
     def load_from_env(cls, provider_type: ProviderType) -> EnvProviderConfig:
         """Load provider configuration from environment variables"""
         if provider_type not in cls.ENV_MAPPINGS:
-            raise ValueError(f"No environment mapping found for provider {provider_type.value}")
+            raise ValueError(
+                f"No environment mapping found for provider {provider_type.value}"
+            )
 
         mapping = cls.ENV_MAPPINGS[provider_type]
 
@@ -131,11 +133,95 @@ class ProviderEnvLoader:
         )
 
 
-def load_dotenv_if_exists():
-    """Load .env file if it exists"""
-    from dotenv import load_dotenv
-    env_file = os.path.join(os.getcwd(), ".env")
-    if os.path.exists(env_file):
-        load_dotenv(env_file)
+def get_global_config_dir():
+    """Get global mcode config directory"""
+    from pathlib import Path
+
+    return Path.home() / ".mcode"
+
+
+def get_global_env_path():
+    """Get path to global .env file"""
+    return get_global_config_dir() / ".env"
+
+
+def create_global_config_template():
+    """Create global config directory and .env template if they don't exist"""
+    config_dir = get_global_config_dir()
+    env_path = get_global_env_path()
+
+    # Create config directory
+    config_dir.mkdir(exist_ok=True)
+
+    # Create .env template if it doesn't exist
+    if not env_path.exists():
+        template = """# mcode Global Configuration
+# Copy this file and configure your API keys
+
+# OpenAI
+# OPENAI_API_KEY=your_openai_api_key_here
+# OPENAI_MODEL=gpt-4
+# OPENAI_SYSTEM_PROMPT="You are helpful assistant. You are able to use tools"
+
+# Google Gemini
+# GEMINI_API_KEY=your_gemini_api_key_here
+# GEMINI_MODEL=gemini-2.0-flash-exp
+# GEMINI_SYSTEM_PROMPT="You are helpful assistant. You are able to use tools"
+
+# Mistral AI
+# MISTRAL_API_KEY=your_mistral_api_key_here
+# MISTRAL_MODEL=mistral-large-latest
+# MISTRAL_SYSTEM_PROMPT="You are helpful assistant. You are able to use tools"
+
+# Ollama (local server)
+# OLLAMA_BASE_URL=http://localhost:11434/v1
+# OLLAMA_MODEL=qwen3:8b
+# OLLAMA_SYSTEM_PROMPT="You are helpful assistant. You are able to use tools"
+
+# OpenRouter
+# OPENROUTER_API_KEY=your_openrouter_api_key_here
+# OPENROUTER_MODEL=mistralai/devstral-small:free
+# OPENROUTER_SYSTEM_PROMPT="You are helpful assistant. You are able to use tools"
+
+# Custom OpenAI-compatible API
+# CUSTOM_OPENAI_API_KEY=your_custom_api_key_here
+# CUSTOM_OPENAI_BASE_URL=https://your-custom-endpoint.com/v1
+# CUSTOM_OPENAI_MODEL=your-model-name
+# CUSTOM_OPENAI_SYSTEM_PROMPT="You are helpful assistant. You are able to use tools"
+"""
+        env_path.write_text(template)
+        print(f"Created global config template at {env_path}")
+        print(f"Please edit {env_path} and add your API keys")
         return True
     return False
+
+
+def load_dotenv_if_exists():
+    """Load .env files in priority order: global ~/.mcode/.env, then local .env"""
+    from pathlib import Path
+
+    from dotenv import load_dotenv
+
+    # Ensure global config exists
+    create_global_config_template()
+
+    loaded_files = []
+
+    # First, try to load global config
+    global_env_path = get_global_env_path()
+    if global_env_path.exists():
+        load_dotenv(global_env_path)
+        loaded_files.append(str(global_env_path))
+
+    # Then, try to load local .env (will override global)
+    local_env_path = Path(".env")
+    if local_env_path.exists():
+        load_dotenv(local_env_path, override=True)
+        loaded_files.append(str(local_env_path.absolute()))
+
+    if loaded_files:
+        print(f"Loaded environment from: {', '.join(loaded_files)}")
+    else:
+        print("No .env files found")
+
+    return len(loaded_files) > 0

@@ -1,4 +1,4 @@
-# Claude Instructions for up-agents
+# Claude Instructions for mcode
 
 ## Project Overview
 Терминальная агентная система с поддержкой различных LLM провайдеров (исключая Anthropic) и MCP протокола для инструментов.
@@ -8,7 +8,7 @@
 ### Package Management
 - Используется **uv** для управления Python зависимостями из корня проекта
 - Команды: `uv add <package>`, `uv run <script>`, `uv sync`
-- CLI команда: `uv run up-agents` или `uv run python -m src.llms.main`
+- CLI команда: `uv run mcode` или `uv run python -m src.llms.main`
 
 ### Code Quality
 - **Linting**: `uvx ruff .`
