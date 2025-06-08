@@ -1,4 +1,3 @@
-
 from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.providers.openai import OpenAIProvider
@@ -24,6 +23,40 @@ class OpenRouterLLMProvider(BaseLLMProvider):
             model=model, retries=self.retries, system_prompt=self.system_prompt
         )
         result = await agent.run(query)
+        return result.output
+
+    async def get_response_with_history(self, messages: list[dict[str, str]]) -> str:
+        """Get response from OpenRouter model with conversation history"""
+        base_url = self.base_url or "https://openrouter.ai/api/v1"
+        model = OpenAIModel(
+            model_name=self.model_name,
+            provider=OpenAIProvider(base_url=base_url, api_key=self.api_key),
+        )
+        agent = Agent(
+            model=model, retries=self.retries, system_prompt=self.system_prompt
+        )
+
+        # For now, just use sequential agent runs to build context
+        if not messages:
+            return ""
+
+        # Start with first message if available
+        if len(messages) == 1:
+            return await self.get_response(messages[0]["content"])
+
+        # For multiple messages, create conversational context in the prompt
+        conversation_context = ""
+        for msg in messages[:-1]:
+            if msg["role"] == "user":
+                conversation_context += f"Previous User: {msg['content']}\n"
+            elif msg["role"] == "assistant":
+                conversation_context += f"Previous Assistant: {msg['content']}\n"
+
+        # Current message with context
+        current_message = messages[-1]["content"]
+        full_prompt = f"Previous conversation:\n{conversation_context}\nCurrent message: {current_message}"
+
+        result = await agent.run(full_prompt)
         return result.output
 
     def validate_config(self) -> bool:

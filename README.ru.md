@@ -1,39 +1,73 @@
-# up-agents
+# mcode
 
 🤖 **Терминальная агентная система с поддержкой различных LLM провайдеров**
 
-Полноценный CLI чат-интерфейс, который подключается к множеству LLM провайдеров через единый терминальный интерфейс.
+Мощный CLI чат-интерфейс, который подключается к множеству LLM провайдеров через единый терминальный интерфейс. Включает чат в реальном времени, управление сессиями и расширяемую архитектуру провайдеров.
 
 **Языковые версии:** Русский | [English](README.md)
 
 ## 🚀 Установка
 
+### Глобальная установка (Рекомендуется)
+
 ```bash
 # Клонирование репозитория
-git clone https://github.com/bogdan01m/up-agents.git
-cd up-agents
+git clone https://github.com/bogdan01m/mcode.git
+cd mcode
+
+# Глобальная установка с uv
+uv tool install .
+
+# Инициализация глобальной конфигурации (создает ~/.mcode/.env)
+mcode config init
+
+# Редактируйте глобальную конфигурацию и добавьте ваши API ключи
+# Файл конфигурации будет создан в ~/.mcode/.env
+```
+
+**Вот и всё!** Теперь вы можете использовать `mcode` из любой директории:
+
+```bash
+mcode chat                    # Интерактивный чат с автовыбором провайдера
+mcode chat -p ollama "Привет" # Быстрый вопрос с конкретным провайдером
+```
+
+### Установка для разработки
+
+```bash
+# Клонирование репозитория
+git clone https://github.com/bogdan01m/mcode.git
+cd mcode
 
 # Установка зависимостей
 uv sync
 
-# Настройка переменных окружения
-cp .env.example .env
-# Отредактируйте .env файл, добавив ваши API ключи
+# Использование с uv run (для разработки)
+uv run mcode --help
 ```
 
-## 🔧 Настройка
+## 🔧 Конфигурация
 
-Настройте ваши LLM провайдеры, заполнив `.env` файл:
+### Глобальная конфигурация (Рекомендуется)
+
+После установки запустите `mcode config init` для создания шаблона глобальной конфигурации в `~/.mcode/.env`. Эта конфигурация будет использоваться из любой директории.
+
+```bash
+mcode config init    # Создает ~/.mcode/.env с шаблоном
+mcode config list    # Показывает пути к файлам конфигурации
+```
+
+Отредактируйте `~/.mcode/.env` и раскомментируйте/настройте ваши API ключи:
 
 ```bash
 # OpenAI
 OPENAI_API_KEY=your_openai_api_key_here
-OPENAI_MODEL=gpt-4-nano
+OPENAI_MODEL=gpt-4
 OPENAI_SYSTEM_PROMPT="You are helpful assistant. You are able to use tools"
 
 # Google Gemini
 GEMINI_API_KEY=your_gemini_api_key_here
-GEMINI_MODEL=gemini-2.5-flash
+GEMINI_MODEL=gemini-2.0-flash-exp
 GEMINI_SYSTEM_PROMPT="You are helpful assistant. You are able to use tools"
 
 # Mistral AI
@@ -58,58 +92,71 @@ CUSTOM_OPENAI_MODEL=your-model-name
 CUSTOM_OPENAI_SYSTEM_PROMPT="You are helpful assistant. You are able to use tools"
 ```
 
+### Локальная конфигурация проекта (Опционально)
+
+Вы можете переопределить глобальные настройки для конкретных проектов, создав локальный файл `.env` в директории проекта. Локальная конфигурация имеет приоритет над глобальной.
+
+```bash
+# В директории вашего проекта
+echo 'OPENAI_MODEL=gpt-4-turbo' > .env
+# Это переопределит глобальную настройку OPENAI_MODEL только для этого проекта
+```
+
 ## 📋 Использование
 
 ### Команды чата
 
 ```bash
 # Интерактивный чат с автовыбором провайдера
-uv run up-agents chat
+mcode chat
 
 # Одиночный запрос с конкретным провайдером
-uv run up-agents chat -p ollama "Привет, как дела?"
+mcode chat -p ollama "Привет, как дела?"
 
 # Чат с пользовательской моделью и системным промптом
-uv run up-agents chat -p openai -m gpt-4 -s "Ты помощник по кодингу" "Напиши Python функцию"
+mcode chat -p openai -m gpt-4 -s "Ты помощник по кодингу" "Напиши Python функцию"
 
 # Чат без сохранения истории
-uv run up-agents chat -p ollama --no-history "Быстрый вопрос"
+mcode chat -p ollama --no-history "Быстрый вопрос"
 ```
 
 ### Управление провайдерами
 
 ```bash
 # Список всех доступных провайдеров
-uv run up-agents providers list
+mcode providers list
 
 # Тестирование соединения с провайдером
-uv run up-agents providers test ollama
+mcode providers test ollama
 
 # Информация о провайдере
-uv run up-agents providers info openai
+mcode providers info openai
 ```
 
 ### Управление сессиями
 
 ```bash
 # Список чат-сессий
-uv run up-agents session list
+mcode session list
 
 # Возобновление предыдущей сессии
-uv run up-agents session resume <session-id>
+mcode session resume <session-id>
 
 # Экспорт сессии в файл
-uv run up-agents session export <session-id> --format markdown
+mcode session export <session-id> --format markdown
 ```
 
-### Конфигурация
+### Управление конфигурацией
 
 ```bash
-# Показать текущую конфигурацию
-uv run up-agents config list
+# Инициализация глобальной конфигурации
+mcode config init
+
+# Показать пути к файлам конфигурации
+mcode config list
 
 # Проверить настройки провайдеров
-uv run up-agents config validate
+mcode config validate
 ```
 
 ## 🤖 Поддерживаемые провайдеры
@@ -127,24 +174,31 @@ uv run up-agents config validate
 
 ### ✨ Возможности
 
-- **Реальная интеграция с LLM** - Прямые API вызовы ко всем провайдерам
-- **Автовыбор провайдера** - Интерактивный выбор провайдера
-- **Красивый терминальный интерфейс** - Поддержка markdown форматирования
-- **Настройка через окружение** - Безопасная настройка через `.env`
-- **Управление сессиями** - История чатов и возобновление
-- **Гибкое использование** - Одиночные запросы или интерактивные сессии
+- **🤖 Реальная интеграция с LLM** - Прямые API вызовы ко всем основным провайдерам
+- **⚡ Автовыбор провайдера** - Интерактивный выбор провайдера с индикаторами статуса
+- **🎨 Красивый терминальный интерфейс** - Поддержка markdown и подсветки синтаксиса
+- **🔐 Глобальная конфигурация** - Безопасная настройка на основе окружения с глобальными и локальными конфигурациями
+- **📝 Управление сессиями** - Постоянная история чатов с возможностью возобновления и экспорта
+- **🚀 Гибкое использование** - Одиночные запросы, интерактивные сессии или пользовательские параметры модели
+- **🔧 Расширяемая архитектура** - Factory паттерн для легкого добавления провайдеров
+- **📦 Глобальная установка** - Установить один раз, использовать в любом месте системы
 
 ## 📁 Структура проекта
 
 ```
 src/
-├── cli/                     # CLI интерфейс
+├── cli/                     # 🖥️  CLI интерфейс
 │   ├── commands/           # Команды: chat, providers, session
-│   ├── ui/                 # Терминальный UI
-│   └── session/           # Управление сессиями
-├── llms/                   # LLM провайдеры
+│   ├── ui/                 # Компоненты терминального UI
+│   │   └── chat_engine.py  # Основная функциональность чата
+│   └── session/           # Управление сессиями (фреймворк)
+├── llms/                   # 🧠 LLM провайдеры
 │   └── llm_call/          # Factory паттерн для провайдеров
-└── mcp/                   # MCP интеграция (планируется)
+│       ├── base_provider.py      # Базовый интерфейс провайдера
+│       ├── provider_factory.py   # Фабрика и реестр провайдеров
+│       ├── env_config.py         # Конфигурация окружения
+│       └── llm_providers/        # Реализации отдельных провайдеров
+└── mcp/                   # 🔧 MCP интеграция (планируется)
 ```
 
 ## 🛠️ Разработка
@@ -156,33 +210,40 @@ uvx black .
 # Линтинг
 uvx ruff .
 
-# Запуск демо Factory паттерна
-uv run up-agents-demo
+# Запуск демо Factory паттерна (после глобальной установки)
+mcode-demo
 
-# Тестирование чата
-uv run up-agents chat -p ollama "Привет от разработки!"
+# Тестирование функциональности чата
+mcode chat -p ollama "Привет от разработки!"
+
+# Или использование режима разработки
+uv run mcode chat -p ollama "Привет от разработки!"
 ```
 
 ## 🚀 Примеры
 
 ### Быстрый старт
 ```bash
+# Установка и инициализация
+uv tool install .
+mcode config init
+
 # Настройка Ollama (локально) - API ключ не требуется
-echo 'OLLAMA_MODEL=qwen3:8b' >> .env
-uv run up-agents chat -p ollama "Объясни квантовые вычисления"
+echo 'OLLAMA_MODEL=qwen3:8b' >> ~/.mcode/.env
+mcode chat -p ollama "Объясни квантовые вычисления"
 ```
 
 ### Продвинутое использование
 ```bash
 # Многостадийный диалог с пользовательскими настройками
-uv run up-agents chat -p openai -m gpt-4 -s "Ты эксперт по Python"
+mcode chat -p openai -m gpt-4 -s "Ты эксперт по Python"
 # Затем вводите несколько вопросов интерактивно
 ```
 
 ### Сравнение провайдеров
 ```bash
 # Тестирование одного вопроса на разных провайдерах
-uv run up-agents chat -p ollama "Напиши Python функцию"
-uv run up-agents chat -p openai "Напиши Python функцию"
-uv run up-agents chat -p gemini "Напиши Python функцию"
+mcode chat -p ollama "Напиши Python функцию"
+mcode chat -p openai "Напиши Python функцию"
+mcode chat -p gemini "Напиши Python функцию"
 ```

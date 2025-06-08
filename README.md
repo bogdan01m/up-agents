@@ -1,39 +1,73 @@
-# up-agents
+# mcode
 
 🤖 **Terminal agent system with support for various LLM providers**
 
-A fully functional CLI chat interface that connects to multiple LLM providers through a unified terminal experience.
+A powerful CLI chat interface that connects to multiple LLM providers through a unified terminal experience. Features real-time chat, session management, and extensible provider architecture.
 
 **Language versions:** [Русский](README.ru.md) | English
 
 ## 🚀 Installation
 
+### Global Installation (Recommended)
+
 ```bash
 # Clone repository
-git clone https://github.com/bogdan01m/up-agents.git
-cd up-agents
+git clone https://github.com/bogdan01m/mcode.git
+cd mcode
+
+# Install globally with uv
+uv tool install .
+
+# Initialize global configuration (creates ~/.mcode/.env)
+mcode config init
+
+# Edit global config and add your API keys
+# The config file will be created at ~/.mcode/.env
+```
+
+**That's it!** Now you can use `mcode` from anywhere:
+
+```bash
+mcode chat                    # Interactive chat with auto-provider selection
+mcode chat -p ollama "Hello" # Quick question with specific provider
+```
+
+### Development Installation
+
+```bash
+# Clone repository
+git clone https://github.com/bogdan01m/mcode.git
+cd mcode
 
 # Install dependencies
 uv sync
 
-# Setup environment variables
-cp .env.example .env
-# Edit .env file and add your API keys
+# Use with uv run (for development)
+uv run mcode --help
 ```
 
 ## 🔧 Configuration
 
-Configure your LLM providers by filling the `.env` file:
+### Global Configuration (Recommended)
+
+After installation, run `mcode config init` to create a global configuration template at `~/.mcode/.env`. This config will be used from any directory.
+
+```bash
+mcode config init    # Creates ~/.mcode/.env with template
+mcode config list    # Shows config file locations
+```
+
+Edit `~/.mcode/.env` and uncomment/configure your API keys:
 
 ```bash
 # OpenAI
 OPENAI_API_KEY=your_openai_api_key_here
-OPENAI_MODEL=gpt-4-nano
+OPENAI_MODEL=gpt-4
 OPENAI_SYSTEM_PROMPT="You are helpful assistant. You are able to use tools"
 
 # Google Gemini
 GEMINI_API_KEY=your_gemini_api_key_here
-GEMINI_MODEL=gemini-2.5-flash
+GEMINI_MODEL=gemini-2.0-flash-exp
 GEMINI_SYSTEM_PROMPT="You are helpful assistant. You are able to use tools"
 
 # Mistral AI
@@ -58,58 +92,71 @@ CUSTOM_OPENAI_MODEL=your-model-name
 CUSTOM_OPENAI_SYSTEM_PROMPT="You are helpful assistant. You are able to use tools"
 ```
 
+### Local Project Configuration (Optional)
+
+You can override global settings for specific projects by creating a local `.env` file in your project directory. Local configuration takes precedence over global configuration.
+
+```bash
+# In your project directory
+echo 'OPENAI_MODEL=gpt-4-turbo' > .env
+# This will override the global OPENAI_MODEL setting for this project only
+```
+
 ## 📋 Usage
 
 ### Chat Commands
 
 ```bash
 # Interactive chat with auto-provider selection
-uv run up-agents chat
+mcode chat
 
 # Single query with specific provider
-uv run up-agents chat -p ollama "Hello, how are you?"
+mcode chat -p ollama "Hello, how are you?"
 
 # Chat with custom model and system prompt
-uv run up-agents chat -p openai -m gpt-4 -s "You are a coding assistant" "Write a Python function"
+mcode chat -p openai -m gpt-4 -s "You are a coding assistant" "Write a Python function"
 
 # Chat without saving history
-uv run up-agents chat -p ollama --no-history "Quick question"
+mcode chat -p ollama --no-history "Quick question"
 ```
 
 ### Provider Management
 
 ```bash
 # List all available providers
-uv run up-agents providers list
+mcode providers list
 
 # Test provider connection
-uv run up-agents providers test ollama
+mcode providers test ollama
 
 # Get provider information
-uv run up-agents providers info openai
+mcode providers info openai
 ```
 
 ### Session Management
 
 ```bash
 # List chat sessions
-uv run up-agents session list
+mcode session list
 
 # Resume a previous session
-uv run up-agents session resume <session-id>
+mcode session resume <session-id>
 
 # Export session to file
-uv run up-agents session export <session-id> --format markdown
+mcode session export <session-id> --format markdown
 ```
 
-### Configuration
+### Configuration Management
 
 ```bash
-# Show current configuration
-uv run up-agents config list
+# Initialize global configuration
+mcode config init
+
+# Show configuration file paths
+mcode config list
 
 # Validate provider settings
-uv run up-agents config validate
+mcode config validate
 ```
 
 ## 🤖 Supported Providers
@@ -127,12 +174,14 @@ uv run up-agents config validate
 
 ### ✨ Features
 
-- **Real LLM Integration** - Direct API calls to all providers
-- **Auto Provider Selection** - Interactive provider chooser
-- **Rich Terminal UI** - Beautiful formatting with markdown support
-- **Environment Configuration** - Secure `.env` based setup
-- **Session Management** - Chat history and resumption
-- **Flexible Usage** - Single queries or interactive chat sessions
+- **🤖 Real LLM Integration** - Direct API calls to all major providers
+- **⚡ Auto Provider Selection** - Interactive provider chooser with status indicators
+- **🎨 Rich Terminal UI** - Beautiful formatting with markdown and syntax highlighting
+- **🔐 Global Configuration** - Secure environment-based setup with global and local configs
+- **📝 Session Management** - Persistent chat history with resume and export capabilities
+- **🚀 Flexible Usage** - Single queries, interactive sessions, or custom model parameters
+- **🔧 Extensible Architecture** - Factory pattern for easy provider addition
+- **📦 Global Installation** - Install once, use anywhere on your system
 
 ## 📁 Project Structure
 
@@ -161,33 +210,40 @@ uvx black .
 # Linting
 uvx ruff .
 
-# Run factory pattern demo
-uv run up-agents-demo
+# Run factory pattern demo (after global install)
+mcode-demo
 
 # Test chat functionality
-uv run up-agents chat -p ollama "Hello from development!"
+mcode chat -p ollama "Hello from development!"
+
+# Or use development mode
+uv run mcode chat -p ollama "Hello from development!"
 ```
 
 ## 🚀 Examples
 
 ### Quick Start
 ```bash
+# Install and initialize
+uv tool install .
+mcode config init
+
 # Set up Ollama (local) - no API key required
-echo 'OLLAMA_MODEL=qwen3:8b' >> .env
-uv run up-agents chat -p ollama "Explain quantum computing"
+echo 'OLLAMA_MODEL=qwen3:8b' >> ~/.mcode/.env
+mcode chat -p ollama "Explain quantum computing"
 ```
 
 ### Advanced Usage
 ```bash
 # Multi-turn conversation with custom settings
-uv run up-agents chat -p openai -m gpt-4 -s "You are a Python expert"
+mcode chat -p openai -m gpt-4 -s "You are a Python expert"
 # Then type multiple questions interactively
 ```
 
 ### Provider Comparison
 ```bash
 # Test same question across providers
-uv run up-agents chat -p ollama "Write a Python function"
-uv run up-agents chat -p openai "Write a Python function"
-uv run up-agents chat -p gemini "Write a Python function"
+mcode chat -p ollama "Write a Python function"
+mcode chat -p openai "Write a Python function"
+mcode chat -p gemini "Write a Python function"
 ```

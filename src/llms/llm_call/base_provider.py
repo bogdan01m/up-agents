@@ -56,6 +56,22 @@ class BaseLLMProvider(ABC):
         """
         pass
 
+    async def get_response_with_history(self, messages: list[dict[str, str]]) -> str:
+        """
+        Get response from the LLM provider with conversation history
+
+        Args:
+            messages: List of messages in format [{"role": "user/assistant", "content": "text"}]
+
+        Returns:
+            Response string from the model
+        """
+        # Default implementation: use only the last user message
+        user_messages = [msg for msg in messages if msg.get("role") == "user"]
+        if user_messages:
+            return await self.get_response(user_messages[-1]["content"])
+        return ""
+
     @abstractmethod
     def validate_config(self) -> bool:
         """
